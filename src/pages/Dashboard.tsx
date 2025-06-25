@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@contexts/AuthContext'
-import { getStudent, getEnrollments, getAbsenceSummary } from '@services/api'
+import { getSubjects, getEnrollments, getAbsenceSummary } from '@services/api'
 import { Subject } from '@interfaces/subjects/Subject'
-import { AbsenceSummary } from '@interfaces/absences/AbsenceSummary'
+import { Enrollment } from '@interfaces/enrollments/Enrollment'
+import { StudentAbsenceSummary } from '@interfaces/absences/AbsenceSummary'
 import Navbar from '@components/Navbar'
 import AbsencesSummary from '@components/AbsencesSummary'
 import SubjectsList from '@components/SubjectsList'
@@ -10,12 +11,23 @@ import SubjectsList from '@components/SubjectsList'
 export default function Dashboard() {
   const { apiKey, student } = useAuth()
   const [subjects, setSubjects] = useState<Subject[]>([])
-  const [summary, setSummary] = useState<AbsenceSummary[]>([])
+  const [summary, setSummary] = useState<StudentAbsenceSummary | null>(null)
 
   useEffect(() => {
     if (apiKey && student) {
-      getEnrollments(apiKey, student.id).then(setSubjects).catch(() => {})
-      getAbsenceSummary(apiKey, student.id).then(setSummary).catch(() => {})
+      Promise.all([
+        getEnrollments(apiKey, student.id),
+        getSubjects(apiKey),
+        getAbsenceSummary(apiKey, student.id),
+      ])
+        .then(([enrollments, subjects, summary]) => {
+          const enrolled = subjects.filter((s) =>
+            enrollments.some((e) => e.subject_id === s.id),
+          )
+          setSubjects(enrolled)
+          setSummary(summary)
+        })
+        .catch(() => {})
     }
   }, [apiKey, student])
 

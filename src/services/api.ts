@@ -13,7 +13,8 @@ export async function apiFetch<T>(url: string, apiKey: string) {
 import { Student } from '@interfaces/students/Student'
 import { Subject } from '@interfaces/subjects/Subject'
 import { Absence } from '@interfaces/absences/Absence'
-import { AbsenceSummary } from '@interfaces/absences/AbsenceSummary'
+import { StudentAbsenceSummary } from '@interfaces/absences/AbsenceSummary'
+import { Enrollment } from '@interfaces/enrollments/Enrollment'
 
 export function getStudents(apiKey: string) {
   return apiFetch<Student[]>('/students/', apiKey)
@@ -28,7 +29,7 @@ export function getStudent(apiKey: string, id: number) {
 }
 
 export function getEnrollments(apiKey: string, id: number) {
-  return apiFetch<Subject[]>(`/enrollments/?student_id=${id}`, apiKey)
+  return apiFetch<Enrollment[]>(`/enrollments/?student_id=${id}`, apiKey)
 }
 
 export function getAbsences(apiKey: string, id: number) {
@@ -36,5 +37,5 @@ export function getAbsences(apiKey: string, id: number) {
 }
 
 export function getAbsenceSummary(apiKey: string, id: number) {
-  return apiFetch<AbsenceSummary[]>(`/students/${id}/absence_summary/`, apiKey)
+  return apiFetch<StudentAbsenceSummary>(`/students/${id}/absence_summary/`, apiKey)
 }

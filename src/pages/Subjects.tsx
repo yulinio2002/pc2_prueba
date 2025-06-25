@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import Navbar from '@components/Navbar'
 import SubjectsList from '@components/SubjectsList'
 import { Subject } from '@interfaces/subjects/Subject'
-import { getEnrollments } from '@services/api'
+import { Enrollment } from '@interfaces/enrollments/Enrollment'
+import { getEnrollments, getSubjects } from '@services/api'
 import { useAuth } from '@contexts/AuthContext'
 
 export default function Subjects() {
@@ -11,7 +12,17 @@ export default function Subjects() {
 
   useEffect(() => {
     if (apiKey && student) {
-      getEnrollments(apiKey, student.id).then(setSubjects).catch(() => {})
+      Promise.all([
+        getEnrollments(apiKey, student.id),
+        getSubjects(apiKey),
+      ])
+        .then(([enrollments, subjects]) => {
+          const enrolled = subjects.filter((s) =>
+            enrollments.some((e) => e.subject_id === s.id),
+          )
+          setSubjects(enrolled)
+        })
+        .catch(() => {})
     }
   }, [apiKey, student])
 
